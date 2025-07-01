@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Compressor</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --c-bg: #F9FAFB;
+            --c-surface: #ffffff;
+            --c-text-primary: #1F2937;
+            --c-text-secondary: #6B7280;
+            --c-primary: #3B82F6;
+            --c-primary-hover: #2563EB;
+            --c-border: #E5E7EB;
+            --c-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --c-danger: #EF4444;
+            --c-danger-hover: #DC2626;
+            --border-radius-lg: 16px;
+            --border-radius-md: 8px;
+            --transition-speed: 0.2s;
+        }
+
+        body.dark-mode {
+            --c-bg: #111827;
+            --c-surface: #1F2937;
+            --c-text-primary: #F9FAFB;
+            --c-text-secondary: #9CA3AF;
+            --c-border: #374151;
+            --c-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--c-bg); 
+            color: var(--c-text-primary); 
+            line-height: 1.5; 
+            padding: 24px; 
+            transition: background-color var(--transition-speed), color var(--transition-speed); 
+        }
+
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto;
+        }
+
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+        }
+        
+        header .title-group { text-align: left; }
+        header h1 { font-size: 1.875rem; font-weight: 700; color: var(--c-text-primary); }
+        .byline { font-size: 0.9rem; font-weight: 500; color: var(--c-text-secondary); margin-top: 4px; }
+        
+        #theme-toggle { 
+            font-size: 1.5rem; background: none; border: none; cursor: pointer; 
+            color: var(--c-text-secondary); padding: 8px; border-radius: var(--border-radius-md);
+            transition: transform var(--transition-speed), background-color var(--transition-speed); 
+        }
+        #theme-toggle:hover { transform: scale(1.1); background-color: var(--c-border); }
+
+        .upload-area { 
+            border: 2px dashed var(--c-border); border-radius: var(--border-radius-lg); 
+            padding: 60px 40px; cursor: pointer; transition: background-color var(--transition-speed), border-color var(--transition-speed); 
+            margin-bottom: 30px; display: flex; flex-direction: column; justify-content: center; 
+            align-items: center; text-align: center; background-color: var(--c-surface); box-shadow: var(--c-shadow);
+        }
+        .upload-area:hover, .upload-area.dragover { background-color: var(--c-bg); border-color: var(--c-primary); }
+        .upload-area-icon { font-size: 3rem; color: var(--c-primary); margin-bottom: 16px; }
+        .upload-area div { font-weight: 500; font-size: 1.125rem; }
+        .upload-area div span { color: var(--c-primary); font-weight: 600; }
+        .upload-area p { color: var(--c-text-secondary); font-size: 0.9rem; margin-top: 8px; }
+        #imageInput { display: none; }
+        
+        .workspace { display: none; grid-template-columns: 1fr 380px; gap: 40px; align-items: flex-start; margin-top: 20px; }
+        .workspace.is-visible .animated-panel { animation: fadeInUp 0.5s ease-out forwards; }
+        .main-content { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+        
+        .main-preview-container {
+            background-color: var(--c-surface); border-radius: var(--border-radius-lg);
+            border: 1px solid var(--c-border); box-shadow: var(--c-shadow);
+            padding: 24px; opacity: 0;
+        }
+
+        .comparison-slider {
+            position: relative; width: 100%; overflow: hidden;
+            border-radius: var(--border-radius-md); background-color: var(--c-bg);
+            min-height: 450px; display: flex; justify-content: center; align-items: center;
+        }
+        .comparison-slider .image-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
+        .comparison-slider img { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; max-height: 70vh; }
+        .comparison-slider .after-wrapper { clip-path: inset(0 0 0 50%); }
+        .comparison-slider .slider-handle {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 4px; height: 100%; background-color: rgba(255, 255, 255, 0.8);
+            cursor: ew-resize; z-index: 10;
+        }
+        .comparison-slider .handle-icon {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 36px; height: 36px; border-radius: 50%; background-color: var(--c-primary);
+            color: white; border: 3px solid rgba(255, 255, 255, 0.9);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .preview-info-bar { display: flex; justify-content: space-between; align-items: center; padding: 16px 0 0; gap: 16px; flex-wrap: wrap; }
+        .preview-info { font-weight: 500; font-size: 0.9rem; color: var(--c-text-secondary); }
+        .preview-info b { color: var(--c-text-primary); }
+        #compression-ratio { background-color: #22c55e20; color: #16A34A; font-size: 0.8rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
+
+        #imageQueueContainer { 
+            display: flex; gap: 16px; overflow-x: auto; padding: 16px; 
+            border-radius: var(--border-radius-lg); -ms-overflow-style: none; scrollbar-width: thin; 
+            scrollbar-color: var(--c-border) transparent; opacity: 0; animation-delay: 0.1s;
+        }
+        #imageQueueContainer::-webkit-scrollbar { height: 8px; }
+        #imageQueueContainer::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 4px; }
+        
+        .image-card { 
+            border: 2px solid transparent; border-radius: var(--border-radius-md); padding: 8px; 
+            background-color: var(--c-surface); cursor: pointer; transition: all var(--transition-speed); 
+            min-width: 150px; text-align: center; border: 1px solid var(--c-border);
+        }
+        .image-card:hover { transform: translateY(-4px); box-shadow: var(--c-shadow); border-color: var(--c-primary); }
+        .image-card.selected { border-color: var(--c-primary); box-shadow: 0 0 0 3px var(--c-primary); }
+        .image-card h3 { color: var(--c-text-primary); font-weight: 500; word-break: break-all; font-size: 0.8rem; margin-top: 8px; }
+        .image-preview { width: 100%; height: 90px; border-radius: 6px; object-fit: cover; background-color: var(--c-bg); }
+
+        .settings { 
+            background-color: var(--c-surface); padding: 24px; border-radius: var(--border-radius-lg); 
+            border: 1px solid var(--c-border); position: sticky; top: 24px; 
+            transition: background-color var(--transition-speed); opacity: 0; 
+            animation-delay: 0.2s; box-shadow: var(--c-shadow);
+        }
+        .settings fieldset { border: none; padding: 0; margin-bottom: 24px; }
+        .settings legend { 
+            font-weight: 600; color: var(--c-text-primary); padding: 0;
+            margin-bottom: 16px; font-size: 1.125rem; width: 100%;
+            border-bottom: 1px solid var(--c-border); padding-bottom: 12px;
+        }
+        .setting-item { margin-bottom: 20px; }
+        .setting-item:last-child { margin-bottom: 0; }
+        .setting-item label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem; color: var(--c-text-secondary); }
+        .setting-item select, .setting-item input[type="number"], .setting-item input[type="text"] { 
+            width: 100%; padding: 10px 12px; border: 1px solid var(--c-border); 
+            border-radius: var(--border-radius-md); background-color: var(--c-surface); 
+            color: var(--c-text-primary); transition: all var(--transition-speed); font-size: 0.9rem;
+        }
+        .setting-item input:focus, .setting-item select:focus { border-color: var(--c-primary); box-shadow: 0 0 0 3px var(--c-primary); outline: none; }
+        
+        .dimension-inputs { display: flex; align-items: center; gap: 10px; }
+        .dimension-inputs input[type="number"] { -moz-appearance: textfield; }
+        .dimension-inputs input::-webkit-outer-spin-button,
+        .dimension-inputs input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .dimension-inputs span { font-weight: bold; color: var(--c-text-secondary); }
+        .aspect-ratio-label { display: flex; align-items: center; cursor: pointer; padding: 8px; border-radius: var(--border-radius-md); transition: background-color var(--transition-speed); }
+        .aspect-ratio-label:hover { background-color: var(--c-bg); }
+        #aspect-ratio-lock { display: none; }
+        .lock-icon { color: var(--c-text-secondary); }
+        #aspect-ratio-lock:checked + .lock-icon { color: var(--c-primary); }
+        .file-size-inputs { display: flex; gap: 10px; }
+        .file-size-inputs select { width: 90px; }
+        
+        #qualitySlider { -webkit-appearance: none; width: 100%; height: 8px; border-radius: 4px; background: var(--c-border); outline: none; transition: opacity .2s; }
+        #qualitySlider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--c-primary); cursor: pointer; border: 3px solid var(--c-surface); box-shadow: var(--c-shadow); }
+        #qualitySlider:disabled::-webkit-slider-thumb { background: #9CA3AF; }
+        #resetSliderBtn { 
+            font-size: 0.8rem; padding: 2px 8px; margin-left: 10px; border-radius: var(--border-radius-md); 
+            border: 1px solid var(--c-border); background-color: transparent; color: var(--c-text-secondary); 
+            cursor: pointer; transition: all var(--transition-speed); 
+        }
+        #resetSliderBtn:hover { background-color: var(--c-border); color: var(--c-text-primary); }
+        
+        .action-button { 
+            width: 100%; padding: 14px; font-size: 1rem; font-weight: 600; color: #ffffff; 
+            border: none; border-radius: var(--border-radius-md); cursor: pointer; 
+            transition: all var(--transition-speed); margin-top: 10px; background-color: var(--c-primary);
+        }
+        .action-button:hover:not(:disabled) { background-color: var(--c-primary-hover); transform: translateY(-2px); box-shadow: var(--c-shadow); }
+        .action-button:active:not(:disabled) { transform: translateY(0); }
+        #downloadAllButton:disabled { background-color: #9CA3AF; cursor: not-allowed; transform: none; box-shadow: none; }
+        #uploadAnotherBtn { background-color: var(--c-surface); color: var(--c-primary); border: 1px solid var(--c-primary); display: none; }
+        #uploadAnotherBtn:hover { background-color: var(--c-primary); color: var(--c-surface); }
+        
+        .history-section { margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--c-border); display: none; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .history-header h2 { color: var(--c-text-primary); font-size: 1.5rem; }
+        #clear-history-btn { 
+            background: var(--c-surface); color: var(--c-danger); border: 1px solid var(--c-border); 
+            border-radius: var(--border-radius-md); padding: 8px 12px; font-size: 0.9rem;
+            font-weight: 500; cursor: pointer; transition: all var(--transition-speed); 
+            display: flex; align-items: center; gap: 8px;
+        }
+        #clear-history-btn:hover { background: var(--c-danger); color: white; border-color: var(--c-danger);}
+        #clear-history-btn svg { width: 14px; height: 14px; fill: currentColor; }
+        #historyGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+        .history-item-wrapper { position: relative; }
+        .history-item-wrapper img { 
+            width: 100%; height: 120px; object-fit: cover; border-radius: var(--border-radius-md); 
+            cursor: pointer; border: 2px solid transparent; transition: all var(--transition-speed); 
+        }
+        .history-item-wrapper:hover img { border-color: var(--c-primary); transform: scale(1.05); }
+        .delete-history-btn { 
+            position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; 
+            background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; 
+            cursor: pointer; display: flex; justify-content: center; align-items: center; 
+            font-size: 16px; line-height: 1; opacity: 0; transition: opacity var(--transition-speed); 
+        }
+        .history-item-wrapper:hover .delete-history-btn { opacity: 1; }
+        #noHistory { text-align: center; font-style: italic; color: var(--c-text-secondary); padding: 40px 0; }
+        
+        @media (max-width: 1200px) {
+            .workspace { grid-template-columns: 1fr; }
+            .settings { position: static; margin-top: 24px; }
+        }
+        @media (max-width: 768px) {
+            body { padding: 16px; }
+            header { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 20px; }
+            .byline { font-size: 0.8rem; }
+            header h1 { font-size: 1.5rem; }
+            #theme-toggle { position: absolute; top: 16px; right: 16px; }
+            .comparison-slider { min-height: 300px; }
+            .preview-info-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-group">
+                <h1>Image Compressor</h1>
+                <p class="byline">Made by leshoraa to simplify your workflow.</p>
+            </div>
+            <button id="theme-toggle" title="Change Theme">◐</button>
+        </header>
+        <main>
+            <label for="imageInput" class="upload-area" id="uploadArea">
+                <div class="upload-area-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <div><span>Click to upload</span> or drag and drop</div>
+                <p>PNG, JPG or WEBP</p>
+            </label>
+            <input type="file" id="imageInput" accept="image/jpeg, image/png, image/webp" multiple>
+
+            <div class="workspace" id="workspace">
+                 <div class="main-content">
+                    <div id="imageQueueContainer" class="animated-panel"></div>
+                    <div class="main-preview-container animated-panel">
+                        <div class="comparison-slider" id="comparison-slider">
+                             <div class="image-wrapper before-wrapper">
+                                 <img src="" alt="Original Image Preview" id="preview-before-img">
+                             </div>
+                             <div class="image-wrapper after-wrapper">
+                                <img src="" alt="Compressed Image Preview" id="preview-after-img">
+                             </div>
+                             <div class="slider-handle">
+                                <div class="handle-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><polyline points="8 7 3 12 8 17"></polyline><polyline points="16 7 21 12 16 17"></polyline></svg>
+                                </div>
+                             </div>
+                        </div>
+                        <div class="preview-info-bar">
+                            <p class="preview-info" id="preview-before-info">-</p>
+                            <p class="preview-info" id="preview-after-info">Waiting for settings...</p>
+                            <span id="compression-ratio" style="display: none;"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings animated-panel">
+                    <fieldset>
+                        <legend>Compression Settings</legend>
+                        <div class="setting-item">
+                            <label for="resize-mode">Resize</label>
+                            <select id="resize-mode">
+                                <option value="dimensions">By Dimensions</option>
+                                <option value="percentage">By Percentage</option>
+                                <option value="fileSize">By Target Size</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setting-item" id="dimensions-wrapper">
+                             <label>Width & Height</label>
+                            <div class="dimension-inputs">
+                                <input type="number" id="widthInput" min="1" placeholder="Width">
+                                <span>×</span>
+                                <input type="number" id="heightInput" min="1" placeholder="Height">
+                                <label for="aspect-ratio-lock" class="aspect-ratio-label" title="Lock aspect ratio">
+                                    <input type="checkbox" id="aspect-ratio-lock" checked> 
+                                    <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="setting-item" id="resize-value-wrapper" style="display:none;">
+                            <label for="resize-value">Scale (%)</label>
+                            <input type="number" id="resize-value" min="1" value="100">
+                        </div>
+                        <div class="setting-item" id="file-size-wrapper" style="display:none;">
+                            <label for="file-size-input">Target Size</label>
+                            <div class="file-size-inputs">
+                                <input type="number" id="file-size-input" min="1" value="1">
+                                <select id="file-size-unit-select">
+                                    <option value="MB">MB</option>
+                                    <option value="KB">KB</option>
+                                </select>
+                            </div>
+                        </div>
+
+                         <div class="setting-item">
+                            <label for="format-select">Format</label>
+                            <select id="format-select">
+                                <option value="image/jpeg">JPEG</option>
+                                <option value="image/png">PNG</option>
+                                <option value="image/webp">WebP</option>
+                            </select>
+                        </div>
+                         <div class="setting-item">
+                            <label for="image-title-input">Image title (optional)</label>
+                            <input type="text" id="image-title-input" placeholder="Filename for download">
+                        </div>
+                    </fieldset>
+                    <fieldset id="quality-fieldset">
+                        <legend>Quality</legend>
+                        <div class="setting-item">
+                            <label for="qualitySlider">Quality: <span id="qualityValue">75</span>%
+                               <button id="resetSliderBtn" title="Reset to 75%">Reset</button>
+                            </label>
+                            <input type="range" id="qualitySlider" min="1" max="100" value="75">
+                        </div>
+                    </fieldset>
+                    <button id="downloadAllButton" class="action-button" disabled title="Download all processed images">Download All</button>
+                    <button id="uploadAnotherBtn" class="action-button" title="Clear queue and upload new images">Upload Another</button>
+                </div>
+            </div>
+            <section class="history-section" id="historySection">
+                <div class="history-header">
+                    <h2>History</h2>
+                    <button id="clear-history-btn" title="Clear all history">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/></svg>
+                        Clear All
+                    </button>
+                </div>
+                <div id="historyGrid"></div>
+                <p id="noHistory">No compressed images in history yet.</p>
+            </section>
+        </main>
+    </div>
+
+    <template id="imageCardTemplate">
+        <div class="image-card">
+            <img src="" alt="Preview" class="image-preview">
+            <h3 class="file-name">File Name</h3>
+        </div>
+    </template>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const imageInput = document.getElementById('imageInput');
+            const uploadArea = document.getElementById('uploadArea');
+            const workspace = document.getElementById('workspace');
+            const imageQueueContainer = document.getElementById('imageQueueContainer');
+            const imageCardTemplate = document.getElementById('imageCardTemplate');
+            
+            const comparisonSlider = document.getElementById('comparison-slider');
+            const afterWrapper = comparisonSlider.querySelector('.after-wrapper');
+            const sliderHandle = comparisonSlider.querySelector('.slider-handle');
+            const previewBeforeImg = document.getElementById('preview-before-img');
+            const previewBeforeInfo = document.getElementById('preview-before-info');
+            const previewAfterImg = document.getElementById('preview-after-img');
+            const previewAfterInfo = document.getElementById('preview-after-info');
+            const compressionRatioSpan = document.getElementById('compression-ratio');
+
+            const downloadAllButton = document.getElementById('downloadAllButton');
+            const uploadAnotherBtn = document.getElementById('uploadAnotherBtn');
+            const historySection = document.getElementById('historySection');
+            const historyGrid = document.getElementById('historyGrid');
+            const noHistory = document.getElementById('noHistory');
+            const clearHistoryBtn = document.getElementById('clear-history-btn');
+            const themeToggle = document.getElementById('theme-toggle');
+
+            const formatSelect = document.getElementById('format-select');
+            const resizeModeSelect = document.getElementById('resize-mode');
+            const dimensionsWrapper = document.getElementById('dimensions-wrapper');
+            const widthInput = document.getElementById('widthInput');
+            const heightInput = document.getElementById('heightInput');
+            const aspectRatioLock = document.getElementById('aspect-ratio-lock');
+            const resizeValueWrapper = document.getElementById('resize-value-wrapper');
+            const resizeValueInput = document.getElementById('resize-value');
+            const fileSizeWrapper = document.getElementById('file-size-wrapper');
+            const fileSizeInput = document.getElementById('file-size-input');
+            const fileSizeUnitSelect = document.getElementById('file-size-unit-select');
+            const imageTitleInput = document.getElementById('image-title-input');
+            const qualityFieldset = document.getElementById('quality-fieldset');
+            const qualitySlider = document.getElementById('qualitySlider');
+            const qualityValue = document.getElementById('qualityValue');
+            const resetSliderBtn = document.getElementById('resetSliderBtn');
+            
+            let imageStates = [];
+            let compressionHistory = [];
+            let currentSelectedId = null;
+            let debounceTimer;
+
+            initTheme();
+            loadHistoryFromStorage();
+
+            imageInput.addEventListener('change', (e) => handleFiles(e.target.files));
+            uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+            uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+            uploadArea.addEventListener('drop', (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+            uploadAnotherBtn.addEventListener('click', resetUI);
+            downloadAllButton.addEventListener('click', downloadAllFiles);
+            clearHistoryBtn.addEventListener('click', clearHistory);
+            themeToggle.addEventListener('click', toggleTheme);
+            
+            [formatSelect, resizeModeSelect, qualitySlider, fileSizeInput, fileSizeUnitSelect, resizeValueInput, widthInput, heightInput, aspectRatioLock, imageTitleInput].forEach(el => {
+                el.addEventListener('input', handleSettingChange);
+            });
+            
+            resetSliderBtn.addEventListener('click', () => {
+                if (currentSelectedId && !qualitySlider.disabled) {
+                    qualitySlider.value = 75;
+                    qualitySlider.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+
+            async function handleFiles(files) {
+                const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+                if (imageFiles.length === 0) return;
+                
+                resetUI();
+                
+                uploadArea.style.display = 'none';
+                workspace.style.display = 'grid';
+                uploadAnotherBtn.style.display = 'block';
+                setTimeout(() => workspace.classList.add('is-visible'), 10);
+
+                for (const file of imageFiles) {
+                    const id = Date.now() + Math.random();
+                    const cardClone = imageCardTemplate.content.cloneNode(true);
+                    const cardElement = cardClone.querySelector('.image-card');
+                    cardElement.dataset.id = id;
+                    
+                    const state = {
+                        id, file, cardElement,
+                        originalSrc: null, compressedBlob: null, compressedSrc: null,
+                        width: 0, height: 0,
+                        isHistoried: false,
+                        settings: {
+                            format: 'image/jpeg', resizeMode: 'dimensions', quality: 75,
+                            targetWidth: 0, targetHeight: 0, 
+                            resizeValue: 100, targetSizeValue: 1, targetSizeUnit: 'MB',
+                            imageTitle: file.name.split('.').slice(0, -1).join('.')
+                        }
+                    };
+                    imageStates.push(state);
+                    cardElement.addEventListener('click', () => selectImage(id));
+                    imageQueueContainer.appendChild(cardClone);
+                    await processNewImage(state);
+                }
+                if (imageStates.length > 0) selectImage(imageStates[0].id);
+            }
+
+            function processNewImage(state) {
+                return new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        state.originalSrc = e.target.result;
+                        const cardPreview = state.cardElement.querySelector('.image-preview');
+                        cardPreview.src = state.originalSrc;
+                        state.cardElement.querySelector('.file-name').textContent = state.file.name;
+                        
+                        const img = new Image();
+                        img.onload = () => {
+                            state.width = img.naturalWidth;
+                            state.height = img.naturalHeight;
+                            state.settings.targetWidth = state.width;
+                            state.settings.targetHeight = state.height;
+                            compressSingleImage(state).then(resolve);
+                        };
+                        img.src = state.originalSrc;
+                    };
+                    reader.readAsDataURL(state.file);
+                });
+            }
+            
+            function selectImage(id) {
+                if (currentSelectedId === id) return;
+                currentSelectedId = id;
+                const state = imageStates.find(s => s.id === id);
+                if (!state) return;
+
+                imageStates.forEach(s => s.cardElement.classList.remove('selected'));
+                state.cardElement.classList.add('selected');
+
+                previewBeforeImg.src = state.originalSrc;
+                previewBeforeInfo.innerHTML = `<b>Original:</b> ${state.width}x${state.height} - ${formatBytes(state.file.size)}`;
+
+                if (state.compressedSrc) {
+                    updateAfterPreview(state);
+                } else {
+                    previewAfterImg.src = "";
+                    previewAfterInfo.textContent = "Waiting for compression...";
+                    compressionRatioSpan.style.display = 'none';
+                }
+
+                updateSettingsPanel(state);
+            }
+            
+            function updateAfterPreview(state) {
+                previewAfterImg.src = state.compressedSrc;
+                const tempImg = new Image();
+                tempImg.onload = () => {
+                     const reduction = 1 - (state.compressedBlob.size / state.file.size);
+                     compressionRatioSpan.textContent = `${(reduction * 100).toFixed(0)}% saved`;
+                     compressionRatioSpan.style.display = reduction >= 0 ? 'inline-block' : 'none';
+                     previewAfterInfo.innerHTML = `<b>Compressed:</b> ${tempImg.naturalWidth}x${tempImg.naturalHeight} - ${formatBytes(state.compressedBlob.size)}`;
+                }
+                tempImg.src = state.compressedSrc;
+            }
+
+            function updateSettingsPanel(state) {
+                const { settings } = state;
+                formatSelect.value = settings.format;
+                resizeModeSelect.value = settings.resizeMode;
+                
+                dimensionsWrapper.style.display = settings.resizeMode === 'dimensions' ? 'block' : 'none';
+                resizeValueWrapper.style.display = settings.resizeMode === 'percentage' ? 'block' : 'none';
+                fileSizeWrapper.style.display = settings.resizeMode === 'fileSize' ? 'block' : 'none';
+
+                widthInput.value = Math.round(settings.targetWidth);
+                heightInput.value = Math.round(settings.targetHeight);
+                resizeValueInput.value = settings.resizeValue;
+                fileSizeInput.value = settings.targetSizeValue;
+                fileSizeUnitSelect.value = settings.targetSizeUnit;
+                imageTitleInput.value = settings.imageTitle;
+                
+                qualitySlider.value = settings.quality;
+                qualityValue.textContent = settings.quality;
+                qualityFieldset.style.display = settings.format !== 'image/png' ? 'block' : 'none';
+                
+                const isFileSizeMode = settings.resizeMode === 'fileSize' && settings.format !== 'image/png';
+                qualitySlider.disabled = isFileSizeMode;
+                resetSliderBtn.disabled = isFileSizeMode;
+            }
+
+            function handleSettingChange(e) {
+                if (!currentSelectedId) return;
+                const state = imageStates.find(s => s.id === currentSelectedId);
+                if (!state) return;
+                const settings = state.settings;
+
+                settings.format = formatSelect.value;
+                settings.resizeMode = resizeModeSelect.value;
+                settings.quality = parseInt(qualitySlider.value);
+                settings.resizeValue = parseInt(resizeValueInput.value) || 1;
+                settings.targetSizeValue = parseFloat(fileSizeInput.value) || 1;
+                settings.targetSizeUnit = fileSizeUnitSelect.value;
+                settings.imageTitle = imageTitleInput.value;
+                
+                const ratio = state.width / state.height;
+                if (settings.resizeMode === 'dimensions') {
+                    if (e.target.id === 'widthInput') {
+                        settings.targetWidth = parseInt(widthInput.value) || 0;
+                        if(aspectRatioLock.checked) settings.targetHeight = settings.targetWidth / ratio;
+                    } else if (e.target.id === 'heightInput') {
+                         settings.targetHeight = parseInt(heightInput.value) || 0;
+                        if(aspectRatioLock.checked) settings.targetWidth = settings.targetHeight * ratio;
+                    } else if (e.target.id === 'aspect-ratio-lock') {
+                        settings.targetWidth = parseInt(widthInput.value) || 0;
+                        if(aspectRatioLock.checked) settings.targetHeight = settings.targetWidth / ratio;
+                    }
+                }
+
+                updateSettingsPanel(state);
+                
+                clearTimeout(debounceTimer);
+                previewAfterInfo.textContent = 'Processing...';
+                compressionRatioSpan.style.display = 'none';
+                debounceTimer = setTimeout(() => compressSingleImage(state), 300);
+            }
+
+            async function compressSingleImage(state) {
+                const img = new Image();
+                img.src = state.originalSrc;
+                await new Promise(r => img.onload = r);
+
+                let finalBlob, finalWidth, finalHeight;
+                const settings = state.settings;
+
+                if (settings.resizeMode === 'fileSize' && settings.format !== 'image/png') {
+                    const result = await findOptimalSettings(img, settings);
+                    finalBlob = result.blob; finalWidth = result.width; finalHeight = result.height;
+                    if (state.id === currentSelectedId) {
+                        settings.quality = result.quality; updateSettingsPanel(state);
+                    }
+                } else {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const outputDims = calculateOutputDimensions(state, settings);
+                    finalWidth = outputDims.width; finalHeight = outputDims.height;
+                    canvas.width = finalWidth > 0 ? finalWidth : 1;
+                    canvas.height = finalHeight > 0 ? finalHeight : 1;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    finalBlob = await new Promise(resolve => canvas.toBlob(resolve, settings.format, settings.quality / 100));
+                }
+
+                if (!finalBlob) {
+                    if (state.id === currentSelectedId) previewAfterInfo.textContent = 'Compression Failed';
+                    checkAllCompressed(); return;
+                }
+
+                if (state.compressedSrc) URL.revokeObjectURL(state.compressedSrc);
+                state.compressedBlob = finalBlob;
+                state.compressedSrc = URL.createObjectURL(finalBlob);
+                
+                if (state.id === currentSelectedId) {
+                    updateAfterPreview(state);
+                }
+                
+                checkAllCompressed();
+            }
+            
+            function calculateOutputDimensions(state, settings) {
+                let width = state.width, height = state.height;
+                if (settings.resizeMode === 'percentage') {
+                    const scale = (settings.resizeValue || 100) / 100;
+                    width = state.width * scale;
+                    height = state.height * scale;
+                } else if (settings.resizeMode === 'dimensions') {
+                    width = settings.targetWidth;
+                    height = settings.targetHeight;
+                }
+                return { width: Math.round(width), height: Math.round(height) };
+            }
+            
+            async function findOptimalSettings(img, settings) {
+                 let targetBytes = settings.targetSizeValue * (settings.targetSizeUnit === 'MB' ? 1024 * 1024 : 1024);
+                let scale = 1.0;
+                let bestResult = { blob: null, quality: 0, width: 0, height: 0 };
+
+                while (scale > 0.1) {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const currentWidth = img.naturalWidth * scale;
+                    const currentHeight = img.naturalHeight * scale;
+                    canvas.width = currentWidth;
+                    canvas.height = currentHeight;
+                    ctx.drawImage(img, 0, 0, currentWidth, currentHeight);
+
+                    let low = 1, high = 100, currentBestBlob = null, currentBestQuality = 0;
+                    for (let i = 0; i < 7; i++) {
+                        const mid = Math.ceil((low + high) / 2);
+                        const blob = await new Promise(resolve => canvas.toBlob(resolve, settings.format, mid / 100));
+                        if (blob.size <= targetBytes) {
+                            currentBestBlob = blob; currentBestQuality = mid; low = mid;
+                        } else { high = mid - 1; }
+                    }
+
+                    if (currentBestBlob) {
+                        bestResult = { blob: currentBestBlob, quality: currentBestQuality, width: currentWidth, height: currentHeight };
+                        break;
+                    }
+                    scale -= 0.1;
+                }
+                
+                if (!bestResult.blob) {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.naturalWidth * 0.1; canvas.height = img.naturalHeight * 0.1;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, settings.format, 1/100));
+                    bestResult = { blob, quality: 1, width: canvas.width, height: canvas.height };
+                }
+                return bestResult;
+            }
+
+            function downloadAllFiles() {
+                imageStates.forEach(state => {
+                    if (state.compressedBlob) {
+                        if (!state.isHistoried) { addToHistory(state); state.isHistoried = true; }
+                        const link = document.createElement('a');
+                        link.href = state.compressedSrc;
+                        const name = state.settings.imageTitle || 'image';
+                        const extension = state.settings.format.split('/')[1];
+                        link.download = `${name}.${extension}`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                });
+            }
+
+            function addToHistory(state) {
+                const historyState = {
+                    originalSrc: state.originalSrc, originalName: state.file.name,
+                    settings: JSON.parse(JSON.stringify(state.settings)), timestamp: Date.now()
+                };
+                compressionHistory.unshift(historyState);
+                if (compressionHistory.length > 50) compressionHistory.pop();
+                renderHistory();
+                saveHistoryToStorage();
+            }
+
+            function renderHistory() {
+                historyGrid.innerHTML = '';
+                if (compressionHistory.length > 0) {
+                    historySection.style.display = 'block'; noHistory.style.display = 'none';
+                    compressionHistory.forEach((state, index) => {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'history-item-wrapper';
+                        const historyItem = document.createElement('img');
+                        historyItem.src = state.originalSrc;
+                        historyItem.title = `${state.originalName}\nClick to reload with these settings.`;
+                        historyItem.addEventListener('click', () => replayHistory(index));
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'delete-history-btn';
+                        deleteBtn.innerHTML = '&times;';
+                        deleteBtn.title = 'Delete this item';
+                        deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteHistoryItem(index); });
+                        wrapper.appendChild(historyItem);
+                        wrapper.appendChild(deleteBtn);
+                        historyGrid.appendChild(wrapper);
+                    });
+                } else {
+                    historySection.style.display = 'none'; noHistory.style.display = 'block';
+                }
+            }
+
+            function deleteHistoryItem(index) {
+                compressionHistory.splice(index, 1);
+                saveHistoryToStorage(); renderHistory();
+            }
+
+            function clearHistory() {
+                if (confirm('Are you sure you want to delete all history? This action cannot be undone.')) {
+                    compressionHistory = [];
+                    saveHistoryToStorage(); renderHistory();
+                }
+            }
+
+            async function replayHistory(index) {
+                const historyState = compressionHistory[index];
+                if (!historyState) return;
+                const blob = await fetch(historyState.originalSrc).then(res => res.blob()).catch(() => null);
+                if (!blob) { alert("Failed to reload image from history."); return; }
+                const file = new File([blob], historyState.originalName, { type: blob.type });
+                await handleFiles([file]);
+                if (imageStates.length > 0) {
+                    const newState = imageStates[0];
+                    newState.settings = JSON.parse(JSON.stringify(historyState.settings));
+                    selectImage(newState.id);
+                    await compressSingleImage(newState);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+            
+            function saveHistoryToStorage() { try { localStorage.setItem('compressionHistory', JSON.stringify(compressionHistory)); } catch (e) { console.error("Failed to save history:", e); } }
+            function loadHistoryFromStorage() { const savedHistory = localStorage.getItem('compressionHistory'); if (savedHistory) { try { compressionHistory = JSON.parse(savedHistory); renderHistory(); } catch(e) { compressionHistory = []; } } }
+            function initTheme() { const savedTheme = localStorage.getItem('theme') || 'light'; document.body.classList.toggle('dark-mode', savedTheme === 'dark'); themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '◐'; }
+            function toggleTheme() { const isDark = document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', isDark ? 'dark' : 'light'); themeToggle.textContent = isDark ? '☀️' : '◐'; }
+            function resetUI() {
+                workspace.style.display = 'none';
+                workspace.classList.remove('is-visible');
+                uploadArea.style.display = 'flex';
+                uploadAnotherBtn.style.display = 'none';
+                imageQueueContainer.innerHTML = '';
+                previewBeforeImg.src = '';
+                previewAfterImg.src = '';
+                previewBeforeInfo.innerHTML = '<b>-</b>';
+                previewAfterInfo.innerHTML = 'Waiting for settings...';
+                compressionRatioSpan.style.display = 'none';
+                downloadAllButton.disabled = true;
+                imageInput.value = null;
+                imageStates = [];
+                currentSelectedId = null;
+                afterWrapper.style.clipPath = 'inset(0 0 0 50%)';
+                sliderHandle.style.left = '50%';
+            }
+
+            function checkAllCompressed() { downloadAllButton.disabled = !imageStates.every(s => s.compressedBlob); }
+            function formatBytes(bytes, decimals = 2) { if (!+bytes) return '0 Bytes'; const k = 1024; const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']; const i = Math.floor(Math.log(bytes) / Math.log(k)); return `${parseFloat((bytes / Math.pow(k, i)).toFixed(decimals < 0 ? 0 : decimals))} ${sizes[i]}`; }
+
+            let isDragging = false;
+            const startDragging = (e) => { 
+                e.preventDefault();
+                isDragging = true; 
+            };
+            const stopDragging = () => { isDragging = false; };
+            const onDrag = (e) => {
+                if (!isDragging) return;
+                const rect = comparisonSlider.getBoundingClientRect();
+                const clientX = e.clientX || e.touches[0].clientX;
+                let x = clientX - rect.left;
+                x = Math.max(0, Math.min(x, rect.width));
+                const percent = (x / rect.width) * 100;
+                sliderHandle.style.left = `${percent}%`;
+                afterWrapper.style.clipPath = `inset(0 0 0 ${percent}%)`;
+            };
+
+            sliderHandle.addEventListener('mousedown', startDragging);
+            document.addEventListener('mouseup', stopDragging);
+            document.addEventListener('mousemove', onDrag);
+            sliderHandle.addEventListener('touchstart', startDragging, { passive: false });
+            document.addEventListener('touchend', stopDragging);
+            document.addEventListener('touchmove', onDrag, { passive: false });
+        });
+    </script>
+</body>
+</html>
