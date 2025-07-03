@@ -770,8 +770,8 @@
             
             function saveHistoryToStorage() { try { localStorage.setItem('compressionHistory', JSON.stringify(compressionHistory)); } catch (e) { console.error("Failed to save history:", e); } }
             function loadHistoryFromStorage() { const savedHistory = localStorage.getItem('compressionHistory'); if (savedHistory) { try { compressionHistory = JSON.parse(savedHistory); renderHistory(); } catch(e) { compressionHistory = []; } } }
-            function initTheme() { const savedTheme = localStorage.getItem('theme') || 'light'; document.body.classList.toggle('dark-mode', savedTheme === 'dark'); themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '◐'; }
-            function toggleTheme() { const isDark = document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', isDark ? 'dark' : 'light'); themeToggle.textContent = isDark ? '☀️' : '◐'; }
+            function initTheme() { const savedTheme = localStorage.getItem('theme') || 'light'; document.body.classList.toggle('dark-mode', savedTheme === 'dark'); themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌑'; }
+            function toggleTheme() { const isDark = document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', isDark ? 'dark' : 'light'); themeToggle.textContent = isDark ? '☀️' : '🌑'; }
             function resetUI() {
                 workspace.style.display = 'none';
                 workspace.classList.remove('is-visible');
