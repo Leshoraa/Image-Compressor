@@ -208,7 +208,7 @@
                  <div class="art-container">
                     <div class="comparison-slider" id="initial-art-slider">
                         <div class="image-wrapper before-wrapper">
-                            <img src="https://github.com/Leshoraa/Image-Compressor/blob/main/image.jpeg?raw=true" alt="Original Art Preview" id="initial-before-img">
+                            <img src="https://github.com/Leshoraa/Image-Compressor/blob/main/header.jpeg?raw=true" alt="Original Art Preview" id="initial-before-img">
                         </div>
                         <div class="image-wrapper after-wrapper">
                             <img src="" alt="Compressed Art Preview" id="initial-after-img">
@@ -1260,42 +1260,32 @@
                 const artAfterImg = document.getElementById('initial-after-img');
                 const artBeforeInfo = document.getElementById('initial-before-info');
                 const artAfterInfo = document.getElementById('initial-after-info');
-                const artSlider = document.getElementById('initial-art-slider');
 
                 try {
                     artBeforeInfo.textContent = 'Loading...';
                     artBeforeInfo.style.display = 'block';
-                    artAfterInfo.style.display = 'none';
-
-                    const imageUrl = 'https://cdn.jsdelivr.net/gh/Leshoraa/Image-Compressor@main/image.jpeg';
-                    const response = await fetch(imageUrl);
-                    const originalBlob = await response.blob();
-                    
-                    artBeforeInfo.textContent = `Before: ${formatBytes(originalBlob.size)}`;
-                    
-                    const originalUrl = URL.createObjectURL(originalBlob);
-                    artBeforeImg.src = originalUrl;
-
-                    const img = new Image();
-                    img.src = originalUrl;
-                    await new Promise(r => img.onload = r);
-
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    ctx.drawImage(img, 0, 0);
-
-                    const compressedBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.5));
-                    
-                    const compressedUrl = URL.createObjectURL(compressedBlob);
-                    artAfterImg.src = compressedUrl;
-                    artAfterInfo.textContent = `After: ${formatBytes(compressedBlob.size)}`;
+                    artAfterInfo.textContent = 'Loading...';
                     artAfterInfo.style.display = 'block';
+
+                    const beforeUrl = 'https://cdn.jsdelivr.net/gh/Leshoraa/Image-Compressor@main/img/image.jpeg';
+                    const afterUrl = 'https://cdn.jsdelivr.net/gh/Leshoraa/Image-Compressor@main/img/after.jpeg';
+
+                    artBeforeImg.src = beforeUrl;
+                    artAfterImg.src = afterUrl;
+
+                    const [beforeResponse, afterResponse] = await Promise.all([
+                        fetch(beforeUrl),
+                        fetch(afterUrl)
+                    ]);
+
+                    const beforeBlob = await beforeResponse.blob();
+                    const afterBlob = await afterResponse.blob();
+
+                    artBeforeInfo.textContent = `Before: ${formatBytes(beforeBlob.size)}`;
+                    artAfterInfo.textContent = `After: ${formatBytes(afterBlob.size)}`;
 
                 } catch (error) {
                     artBeforeInfo.textContent = 'Preview failed to load';
-                    artBeforeInfo.style.display = 'block';
                     artAfterInfo.style.display = 'none';
                 }
             }
