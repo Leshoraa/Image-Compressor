@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Compressor</title>
+    <title>Image Compressor Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -156,7 +156,7 @@
     <div class="container">
         <header>
             <div class="title-group">
-                <h1>Image Compressor</h1>
+                <h1>Image Compressor Pro</h1>
                 <p class="byline">Made by leshoraa to simplify your workflow.</p>
             </div>
             <div class="header-actions">
@@ -1070,19 +1070,11 @@
             
             function resetUI() {
                 if (imageStates.length > 0) {
-                    const newState = imageStates[0];
-                    newState.settings = JSON.parse(JSON.stringify(historyState.settings));
-                    selectImage(newState.id);
-                    await compressSingleImage(newState);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                     imageStates.forEach(state => {
+                        if (state.originalSrc) URL.revokeObjectURL(state.originalSrc);
+                        if (state.compressedSrc) URL.revokeObjectURL(state.compressedSrc);
+                    });
                 }
-            }
-            
-            function saveHistoryToStorage() { try { localStorage.setItem('compressionHistory', JSON.stringify(compressionHistory)); } catch (e) { console.error("Failed to save history:", e); } }
-            function loadHistoryFromStorage() { const savedHistory = localStorage.getItem('compressionHistory'); if (savedHistory) { try { compressionHistory = JSON.parse(savedHistory); renderHistory(); } catch(e) { compressionHistory = []; } } }
-            function initTheme() { const savedTheme = localStorage.getItem('theme') || 'light'; document.body.classList.toggle('dark-mode', savedTheme === 'dark'); themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '◐'; }
-            function toggleTheme() { const isDark = document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', isDark ? 'dark' : 'light'); themeToggle.textContent = isDark ? '☀️' : '◐'; }
-            function resetUI() {
                 workspace.style.display = 'none';
                 workspace.classList.remove('is-visible');
                 uploadArea.style.display = 'flex';
