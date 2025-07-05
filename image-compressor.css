@@ -386,4 +386,6 @@ input[type="checkbox"] { accent-color: var(--c-primary); }
     #historyList { grid-template-columns: 1fr; }
     .art-container, #initial-art-slider { max-height: 116px; height: 116px; min-height: 116px; }
     #initial-art-slider img { max-height: 116px; }
+    .how-it-works-section { flex-direction: column; }
+    .step-item-arrow { transform: rotate(90deg); margin: -10px 0; }
 }
