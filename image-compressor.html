@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Compressor Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+    <link rel="stylesheet" href="image-compressor.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="title-group">
+                <h1>Image Compressor Pro</h1>
+                <p class="byline">Made by leshoraa to simplify your workflow.</p>
+            </div>
+            <div class="header-actions">
+                <button id="history-btn-desktop" class="header-button" title="View History">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </button>
+                <button id="delete-all-btn-desktop" class="header-button" title="Delete All Images">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+                <button id="theme-toggle-desktop" class="header-button" title="Change Theme"></button>
+                <button id="hamburger-btn" class="header-button" title="Menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </header>
+        <main>
+            <div id="upload-container">
+                <div class="art-container">
+                    <div class="comparison-slider" id="initial-art-slider">
+                        <div class="image-wrapper before-wrapper">
+                            <img src="https://github.com/Leshoraa/Image-Compressor/blob/main/header.jpeg?raw=true"
+                                alt="Original Art Preview" id="initial-before-img">
+                        </div>
+                        <div class="image-wrapper after-wrapper">
+                            <img src="" alt="Compressed Art Preview" id="initial-after-img">
+                        </div>
+                        <div class="slider-handle">
+                            <div class="handle-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                                    <polyline points="8 7 3 12 8 17"></polyline>
+                                    <polyline points="16 7 21 12 16 17"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                        <div id="initial-before-info" class="initial-info-chip" style="display: none;"></div>
+                        <div id="initial-after-info" class="initial-info-chip" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <div class="art-credit">
+                    Website by: <a href="https://www.instagram.com/leshoraa/" target="_blank"
+                        rel="noopener noreferrer">@Leshoraa</a>
+                </div>
+                <label for="imageInput" class="upload-area" id="uploadArea">
+                    <div class="upload-area-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                    </div>
+                    <div><span>Click to upload</span>, drag and drop, or paste from clipboard</div>
+                    <p>PNG, JPG or WEBP (Shortcuts: Arrow keys to navigate, Del to remove)</p>
+                </label>
+                <div class="info-section-container">
+                    <div class="features-section">
+                        <div class="feature-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M4.5 12.5l3-3l4.5 4.5l6-6" />
+                            </svg>
+                            <h3>Powerful Compression</h3>
+                            <p>Optimize JPEG, PNG, and WebP images with full control over quality for the perfect
+                                balance of size and detail.</p>
+                        </div>
+                        <div class="feature-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path
+                                    d="M15.7 4.3a2 2 0 0 1 2.8 0L21 6.8a2 2 0 0 1 0 2.8l-12 12a2 2 0 0 1-2.8 0l-2.5-2.5a2 2 0 0 1 0-2.8l12-12zM6 16l-2-2" />
+                                <path d="m21.5 11.5-10 10" />
+                            </svg>
+                            <h3>Feature-Rich Editor</h3>
+                            <p>Easily resize, add custom watermarks, and extract color palettes. All in one place.</p>
+                        </div>
+                        <div class="feature-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                            <h3>Privacy by Design</h3>
+                            <p>All image processing happens directly in your browser. Your files are never uploaded to
+                                any server.</p>
+                        </div>
+                    </div>
+
+                    <div class="how-it-works-section">
+                        <div class="step-item">
+                            <div class="step-number">1</div>
+                            <h4>Upload Image</h4>
+                            <p>Click, drag & drop, or paste an image to get started.</p>
+                        </div>
+                        <div class="step-item-arrow">→</div>
+                        <div class="step-item">
+                            <div class="step-number">2</div>
+                            <h4>Adjust Settings</h4>
+                            <p>Customize format, size, quality, and add watermarks.</p>
+                        </div>
+                        <div class="step-item-arrow">→</div>
+                        <div class="step-item">
+                            <div class="step-number">3</div>
+                            <h4>Download</h4>
+                            <p>Instantly preview and download your optimized image.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-section">
+                        <h2>Frequently Asked Questions</h2>
+                        <div class="faq-item">
+                            <h4><span class="faq-q">Q:</span> Is it safe to use? Where do my images go?</h4>
+                            <p><span class="faq-a">A:</span> Absolutely. This tool is 100% client-side, meaning your
+                                images are processed directly in your browser. They are never sent to, or stored on, any
+                                server. Your privacy is guaranteed.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h4><span class="faq-q">Q:</span> What file formats are supported?</h4>
+                            <p><span class="faq-a">A:</span> You can upload and compress images in JPEG, PNG, and WebP
+                                formats. You have full control over the output format and its quality settings.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input type="file" id="imageInput" accept="image/jpeg, image/png, image/webp" multiple>
+            <div class="workspace" id="workspace">
+                <div class="main-content">
+                    <div id="imageQueueContainer" class="animated-panel"></div>
+                    <div class="main-preview-container animated-panel">
+                        <div class="comparison-slider" id="comparison-slider">
+                            <div class="image-wrapper before-wrapper">
+                                <img src="" alt="Original Image Preview" id="preview-before-img">
+                            </div>
+                            <div class="image-wrapper after-wrapper">
+                                <img src="" alt="Compressed Image Preview" id="preview-after-img">
+                            </div>
+                            <div class="slider-handle">
+                                <div class="handle-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                                        <polyline points="8 7 3 12 8 17"></polyline>
+                                        <polyline points="16 7 21 12 16 17"></polyline>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div id="eyedropper-loupe" style="display: none;">
+                                <canvas id="loupe-canvas"></canvas>
+                            </div>
+                        </div>
+                        <div class="preview-info-bar">
+                            <p class="preview-info" id="preview-before-info">-</p>
+                            <p class="preview-info" id="preview-after-info">Waiting for settings...</p>
+                            <span id="compression-ratio" style="display: none;"></span>
+                        </div>
+                        <div class="color-palette-container" id="color-palette-container" style="display: none;">
+                            <div class="color-palette-header">
+                                <h3>Dominant Colors</h3>
+                                <div class="eyedropper-wrapper">
+                                    <button id="eyedropper-btn" class="header-button" title="Pick Color (E)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="var(--c-primary)"><path d="M120-120v-190l358-358-58-56 58-56 76 76 124-124q5-5 12.5-8t15.5-3q8 0 15 3t13 8l94 94q5 6 8 13t3 15q0 8-3 15.5t-8 12.5L705-555l76 78-57 57-56-58-358 358H120Zm80-80h78l332-334-76-76-334 332v78Zm447-410 96-96-37-37-96 96 37 37Zm0 0-37-37 37 37Z"/></svg>
+                                    </button>
+                                    <div id="eyedropper-display" class="color-swatch" style="display: none;"></div>
+                                </div>
+                            </div>
+                            <div class="color-palette" id="color-palette"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings animated-panel">
+                    <fieldset>
+                        <legend>Compression & Size</legend>
+                        <div class="setting-item">
+                            <label for="resize-mode">Resize</label>
+                            <select id="resize-mode">
+                                <option value="dimensions">By Dimensions</option>
+                                <option value="percentage">By Percentage</option>
+                                <option value="fileSize">By Target Size</option>
+                            </select>
+                        </div>
+                        <div class="setting-item" id="dimensions-wrapper">
+                            <label>Width & Height</label>
+                            <div class="dimension-inputs">
+                                <input type="number" id="widthInput" min="1" placeholder="Width">
+                                <span>×</span>
+                                <input type="number" id="heightInput" min="1" placeholder="Height">
+                                <label for="aspect-ratio-lock" class="aspect-ratio-label" title="Lock aspect ratio">
+                                    <input type="checkbox" id="aspect-ratio-lock" checked>
+                                    <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                    </svg>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item" id="resize-value-wrapper" style="display:none;">
+                            <label for="resize-value">Scale (%)</label>
+                            <input type="number" id="resize-value" min="1" value="100">
+                        </div>
+                        <div class="setting-item" id="file-size-wrapper" style="display:none;">
+                            <label for="file-size-input">Target Size</label>
+                            <div class="file-size-inputs">
+                                <input type="number" id="file-size-input" min="1" value="1">
+                                <select id="file-size-unit-select">
+                                    <option value="MB">MB</option>
+                                    <option value="KB">KB</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label for="format-select">Format</label>
+                            <select id="format-select">
+                                <option value="image/jpeg">JPEG</option>
+                                <option value="image/png">PNG</option>
+                                <option value="image/webp">WebP</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label for="image-title-input">Image Title (optional)</label>
+                            <input type="text" id="image-title-input" placeholder="Filename for download">
+                        </div>
+                        <div class="setting-item">
+                            <label for="remove-exif" class="checkbox-label">
+                                <input type="checkbox" id="remove-exif" checked>
+                                Remove Metadata (EXIF)
+                                <span class="tooltip-icon"
+                                    title="Removes data like location and camera info from your image for privacy and smaller file size.">?</span>
+                            </label>
+                        </div>
+                    </fieldset>
+                    <fieldset id="quality-fieldset">
+                        <legend>Quality</legend>
+                        <div class="setting-item">
+                            <label>Presets</label>
+                            <div class="preset-buttons" id="quality-preset-buttons">
+                                <button data-quality="25">Low</button>
+                                <button data-quality="50">Medium</button>
+                                <button data-quality="85">High</button>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label for="qualitySlider">Quality: <span id="qualityValue">75</span>%
+                                <button id="resetSliderBtn" title="Reset to 75%">Reset</button>
+                            </label>
+                            <input type="range" id="qualitySlider" min="1" max="100" value="75">
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Watermark</legend>
+                        <div class="setting-item">
+                            <label for="watermark-type">Type</label>
+                            <select id="watermark-type">
+                                <option value="none">None</option>
+                                <option value="text">Text</option>
+                                <option value="image">Image</option>
+                            </select>
+                        </div>
+                        <div id="watermark-text-controls" style="display: none;">
+                            <div class="setting-item">
+                                <label for="watermark-text">Text</label>
+                                <input type="text" id="watermark-text" placeholder="Your brand">
+                            </div>
+                            <div class="setting-item">
+                                <label for="watermark-font-color">Color & Font Size</label>
+                                <div class="dimension-inputs">
+                                    <input type="color" id="watermark-font-color" value="#ffffff">
+                                    <input type="number" id="watermark-font-size" value="48" min="1">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="watermark-image-controls" style="display: none;">
+                            <div class="setting-item">
+                                <label for="watermark-image-upload">Upload Image</label>
+                                <input type="file" id="watermark-image-upload"
+                                    accept="image/png, image/jpeg, image/webp" class="action-button secondary-button">
+                            </div>
+                        </div>
+                        <div id="watermark-common-controls" style="display: none;">
+                            <div class="setting-item">
+                                <label for="watermark-opacity">Opacity: <span
+                                        id="watermark-opacity-value">0.7</span></label>
+                                <input type="range" id="watermark-opacity" min="0" max="1" step="0.1" value="0.7">
+                            </div>
+                            <div class="setting-item">
+                                <label for="watermark-position">Position</label>
+                                <select id="watermark-position">
+                                    <option value="center">Center</option>
+                                    <option value="top-left">Top Left</option>
+                                    <option value="top-right">Top Right</option>
+                                    <option value="bottom-left">Bottom Left</option>
+                                    <option value="bottom-right">Bottom Right</option>
+                                    <option value="custom" disabled>Custom (Drag on preview)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div class="action-buttons">
+                        <div class="grid-buttons">
+                            <button id="downloadButton" class="action-button" disabled
+                                title="Download selected image">Download</button>
+                            <button id="downloadAllButton" class="action-button secondary-button" disabled
+                                title="Download all processed images">Download All</button>
+                        </div>
+                    </div>
+                    <button id="uploadAnotherBtn" class="action-button" title="Clear queue and upload new images">Upload
+                        Another</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="sidebar-overlay"></div>
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <span>Menu</span>
+            <button id="sidebar-close-btn-header" class="header-button" title="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <button id="history-btn-mobile" class="sidebar-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>History</span>
+        </button>
+        <button id="delete-all-btn-mobile" class="sidebar-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"></path>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            <span>Delete All</span>
+        </button>
+        <button id="theme-toggle-mobile" class="sidebar-button"></button>
+        <button id="sidebar-close-btn-footer" class="sidebar-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            <span>Close</span>
+        </button>
+    </div>
+
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Download History</h2>
+                <div>
+                    <button id="deleteAllHistoryBtn" class="header-button" title="Delete All History">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                    </button>
+                    <span class="close-button" id="closeHistoryModal">&times;</span>
+                </div>
+            </div>
+            <div id="historyList">
+                <p>Your download history is empty.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="confirmModalTitle">Are you sure?</h2>
+            </div>
+            <p id="confirmModalText" style="margin: 16px 0;">This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button id="confirmCancelBtn" class="action-button secondary-button">Cancel</button>
+                <button id="confirmOkBtn" class="action-button danger-button">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <template id="imageCardTemplate">
+        <div class="image-card">
+            <button class="delete-card-btn" title="Remove image">×</button>
+            <img src="" alt="Preview" class="image-preview">
+            <div class="progress-overlay">
+                <div class="progress-text">Processing...</div>
+                <div class="progress-bar">
+                    <div class="progress-bar-inner"></div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="historyCardTemplate">
+        <div class="history-card">
+            <img src="" alt="History preview">
+            <div class="history-card-info">
+                <b class="history-title"></b>
+                <p><span class="history-size"></span> - <span class="history-date"></span></p>
+            </div>
+            <div class="history-card-actions">
+                <button class="action-button secondary-button history-download-btn">Download</button>
+                <button class="action-button danger-button history-delete-btn">Delete</button>
+            </div>
+        </div>
+    </template>
+
+    <script src="image-compressor.js" defer></script>
+</body>
+
+</html>
